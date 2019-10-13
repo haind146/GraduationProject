@@ -1,28 +1,30 @@
 package controllers
 
 import (
-	"net/http"
-	u "crypt-coin-payment/src/utils"
 	"crypt-coin-payment/src/models"
+	u "crypt-coin-payment/src/utils"
 	"encoding/json"
+	"fmt"
+	"net/http"
 )
 
 var CreateAccount = func(w http.ResponseWriter, r *http.Request) {
 
-	account := &models.Account{}
-	err := json.NewDecoder(r.Body).Decode(account) //decode the request body into struct and failed if any error occur
+	user := &models.User{}
+	err := json.NewDecoder(r.Body).Decode(user) //decode the request body into struct and failed if any error occur
 	if err != nil {
+		fmt.Print(err)
 		u.Respond(w, u.Message(false, "Invalid request"))
 		return
 	}
 
-	resp := account.Create() //Create account
+	resp := user.Create() //Create account
 	u.Respond(w, resp)
 }
 
 var Authenticate = func(w http.ResponseWriter, r *http.Request) {
 
-	account := &models.Account{}
+	account := &models.User{}
 	err := json.NewDecoder(r.Body).Decode(account) //decode the request body into struct and failed if any error occur
 	if err != nil {
 		u.Respond(w, u.Message(false, "Invalid request"))
