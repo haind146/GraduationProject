@@ -53,6 +53,7 @@ func (order *Order) Create() (map[string] interface{}) {
 
 	order.ReceiveAddress = receiveAddress
 	order.Status = 0
+	appPubKey.NumOfAddressGenerated = appPubKey.NumOfAddressGenerated + 1
 
 	GetDB().Create(order)
 	GetDB().Save(appPubKey)
