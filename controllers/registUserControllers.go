@@ -1,11 +1,14 @@
 package controllers
 
 import (
-	"crypt-coin-payment/src/models"
-	u "crypt-coin-payment/src/utils"
+	"crypt-coin-payment/models"
+	u "crypt-coin-payment/utils"
 	"encoding/json"
 	"net/http"
 )
+
+const ADMIN_ROLE = 1
+const USER_ROLE = 2
 
 var CreateRegisterUser = func(w http.ResponseWriter, r *http.Request) {
 	registerUser := &models.RegisterUser{}
@@ -21,7 +24,7 @@ var CreateRegisterUser = func(w http.ResponseWriter, r *http.Request) {
 var AcceptRegisterUser = func(w http.ResponseWriter, r *http.Request) {
 	userId := r.Context().Value("user") . (uint)
 	user := models.GetUser(userId)
-	if(user.RoleId != 1) {
+	if(user.RoleId != ADMIN_ROLE) {
 		u.Respond(w, u.Message(false, "User permission denied"))
 		return
 	}

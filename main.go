@@ -1,8 +1,8 @@
 package main
 
 import (
-	"crypt-coin-payment/src/app"
-	"crypt-coin-payment/src/controllers"
+	"crypt-coin-payment/app"
+	"crypt-coin-payment/controllers"
 	"fmt"
 	"github.com/gorilla/mux"
 	"net/http"
@@ -16,6 +16,10 @@ func main() {
 	router.HandleFunc("/api/user/new", controllers.CreateAccount).Methods("POST")
 	router.HandleFunc("/api/user/register", controllers.CreateRegisterUser).Methods("POST")
 	router.HandleFunc("/api/user/accept-register", controllers.AcceptRegisterUser).Methods("POST")
+	router.HandleFunc("/api/user/import-master-pubkey", controllers.CreateMasterPublicKey).Methods("POST")
+	router.HandleFunc("/api/user/application/create", controllers.CreateApplication).Methods("POST")
+	router.HandleFunc("/api/user/order/create", controllers.CreateOrder).Methods("POST")
+	//router.HandleFunc("/api/user/wallet/change", controllers.AcceptRegisterUser).Methods("POST")
 	router.HandleFunc("/api/user/login", controllers.Authenticate).Methods("POST")
 	router.HandleFunc("/api/contacts/new", controllers.CreateContact).Methods("POST")
 	router.HandleFunc("/api/me/contacts", controllers.GetContactsFor).Methods("GET") //  user/2/contacts

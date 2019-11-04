@@ -2,7 +2,7 @@ package models
 
 import (
 	"github.com/dgrijalva/jwt-go"
-	u "crypt-coin-payment/src/utils"
+	u "crypt-coin-payment/utils"
 	"strings"
 	"github.com/jinzhu/gorm"
 	"os"

@@ -1,7 +1,7 @@
 package models
 
 import (
-	u "crypt-coin-payment/src/utils"
+	u "crypt-coin-payment/utils"
 	"fmt"
 	"github.com/jinzhu/gorm"
 )

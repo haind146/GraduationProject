@@ -1,14 +1,14 @@
 package app
 
 import (
-	"net/http"
-	u "crypt-coin-payment/src/utils"
-	"strings"
-	"crypt-coin-payment/src/models"
-	jwt "github.com/dgrijalva/jwt-go"
-	"os"
 	"context"
+	"crypt-coin-payment/models"
+	u "crypt-coin-payment/utils"
 	"fmt"
+	jwt "github.com/dgrijalva/jwt-go"
+	"net/http"
+	"os"
+	"strings"
 )
 
 var JwtAuthentication = func(next http.Handler) http.Handler {

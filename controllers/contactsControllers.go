@@ -1,10 +1,10 @@
 package controllers
 
 import (
-	"net/http"
-	"crypt-coin-payment/src/models"
+	"crypt-coin-payment/models"
+	u "crypt-coin-payment/utils"
 	"encoding/json"
-	u "crypt-coin-payment/src/utils"
+	"net/http"
 )
 
 var CreateContact = func(w http.ResponseWriter, r *http.Request) {

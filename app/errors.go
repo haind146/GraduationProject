@@ -1,8 +1,8 @@
 package app
 
 import (
+	u "crypt-coin-payment/utils"
 	"net/http"
-	u "crypt-coin-payment/src/utils"
 )
 
 var NotFoundHandler = func(next http.Handler) http.Handler {

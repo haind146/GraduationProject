@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"github.com/btcsuite/btcutil/hdkeychain"
 	"net/http"
 	"regexp"
 )
@@ -31,4 +32,10 @@ func Generate64BytesRandom() string {
 		return ""
 	}
 	return hex.EncodeToString(key)
+}
+
+func ValidateMasterPublicKey(pubKeyStr string) bool  {
+	masterPublicKey, err := hdkeychain.NewKeyFromString(pubKeyStr)
+	fmt.Println(err)
+	return err == nil && !masterPublicKey.IsPrivate() && masterPublicKey.Depth() == 0
 }

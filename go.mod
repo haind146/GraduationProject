@@ -1,6 +1,8 @@
 module crypt-coin-payment
 
 require (
+	github.com/btcsuite/btcd v0.20.0-beta
+	github.com/btcsuite/btcutil v0.0.0-20190425235716-9e5f4b9a998d
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gorilla/context v1.1.1 // indirect
 	github.com/gorilla/mux v1.6.2

@@ -1,8 +1,8 @@
 package controllers
 
 import (
-	"crypt-coin-payment/src/models"
-	u "crypt-coin-payment/src/utils"
+	"crypt-coin-payment/models"
+	u "crypt-coin-payment/utils"
 	"encoding/json"
 	"fmt"
 	"net/http"
