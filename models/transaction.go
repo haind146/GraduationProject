@@ -7,9 +7,9 @@ import (
 type Transaction struct {
 	gorm.Model
 	OrderId string `json:"order_id"`
-	TransactionHash uint `json:"transaction_hash"`
-	From uint `json:"from"`
-	To uint `json:"to"`
+	TransactionHash string `gorm:"type:varchar(100);unique_index"`
+	From string `gorm:"type:varchar(100);index"`
+	To string `gorm:"type:varchar(100);index"`
 	Value uint `json:"value"`
 	Fee uint `json:"fee"`
 	BlockHash uint `json:"block_hash"`
@@ -18,10 +18,11 @@ type Transaction struct {
 	PaymentMethodIs uint `json:"payment_method_id"`
 }
 
-//func (transaction *Transaction) Create() (map[string] interface{}) {
-//	//GetDB().Create(address)
-//}
-//
+
+func (transaction *Transaction) Create() error {
+	result := GetDB().Create(transaction)
+	return result.Error
+}
 //func GetTransaction(id uint) (*Transaction) {
 //	//
 //	//address := &Address{}

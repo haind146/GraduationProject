@@ -10,7 +10,7 @@ type Order struct {
 	gorm.Model
 	PartnerOrderId string `json:"partner_order_id"`
 	Amount uint `json:"amount"`
-	ReceiveAddress string `json:"receive_address"`
+	ReceiveAddress string `gorm:"type:varchar(100);unique_index"`
 	PaymentMethodId uint `json:"payment_method_id"`
 	ApplicationId uint `json:"application_id"`
 	Status uint `json:"status"`
@@ -60,4 +60,13 @@ func (order *Order) Create() (map[string] interface{}) {
 	resp := u.Message(true, "success")
 	resp["order"] = order
 	return resp
+}
+
+func FindOrderByAddress (address string) *Order {
+	order := &Order{}
+	err := GetDB().Table("orders").Where("receive_address = ?", address).First(order).Error
+	if err != nil {
+		return nil
+	}
+	return order
 }

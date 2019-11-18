@@ -3,6 +3,7 @@ package main
 import (
 	"crypt-coin-payment/app"
 	"crypt-coin-payment/controllers"
+	"crypt-coin-payment/subscriber"
 	"fmt"
 	"github.com/gorilla/mux"
 	"net/http"
@@ -34,6 +35,9 @@ func main() {
 	}
 
 	fmt.Println(port)
+
+	subscribe := subscriber.SubscriberFactory(1)
+	go subscribe.Subscribe()
 
 	err := http.ListenAndServe(":" + port, router) //Launch the app, visit localhost:8000/api
 	if err != nil {

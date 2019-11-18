@@ -22,6 +22,7 @@ var CreateOrder = func(w http.ResponseWriter, r *http.Request) {
 		u.Respond(w, u.Message(false, "Application Id not found"))
 		return
 	}
+
 	resp := order.Create()
 	u.Respond(w, resp)
 }
