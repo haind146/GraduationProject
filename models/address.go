@@ -12,17 +12,16 @@ type Address struct {
 	Balance uint `json:"balance"`
 	PendingSent uint `json:"pending_sent"`
 	PendingReceive uint `json:"pending_receive"`
-	MnemonicPath uint `json:"mnemonic_path"`
+	MnemonicPath string `json:"mnemonic_path"`
 }
 
 //func (address *Address) Create() (map[string] interface{}) {
 //	GetDB().Create(address)
 //}
 
-func GetAddress(id uint) (*Address) {
-
+func GetAddress(addr string) (*Address) {
 	address := &Address{}
-	err := GetDB().Table("addresses").Where("id = ?", id).First(address).Error
+	err := GetDB().Table("addresses").Where("address = ?", address).First(address).Error
 	if err != nil {
 		return nil
 	}

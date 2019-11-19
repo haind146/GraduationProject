@@ -44,13 +44,34 @@ func HandleNewTransaction(rawTx []byte)  {
 	tx, err := rpcClient.DecodeRawTransaction(rawTx)
 	if err != nil {
 		log.Println(err)
+		return
 	}
 
 	for _, vout := range tx.Vout  {
 		for _, address := range vout.ScriptPubKey.Addresses {
+			addressModel := models.GetAddress(address)
+			dbTx := models.GetDB().Begin()
+			if addressModel != nil {
+				transaction := &models.Transaction{
+					OrderId:         addressModel.OrderId,
+					TransactionHash: tx.Hash,
+					From:            nil,
+					To:              address,
+					Value:           vout.Value,
+					BlockHash:       tx.BlockHash,
+					Type:            models.TYPE_PAYMENT,
+					PaymentMethodId: 1,
+				}
+				err = dbTx.Create(transaction).Error
+			}
 			order := models.FindOrderByAddress(address)
-			if order != nil {
-
+			order.ReceivedValue += vout.Value
+			err = dbTx.Save(order).Error
+			if err != nil {
+				log.Println(err)
+				dbTx.Rollback()
+			} else {
+				dbTx.Commit()
 			}
 		}
 	}

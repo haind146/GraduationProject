@@ -8,10 +8,11 @@ import (
 	"github.com/gorilla/mux"
 	"net/http"
 	"os"
+	"runtime"
 )
 
 func main() {
-
+	runtime.GOMAXPROCS(runtime.NumCPU())
 	router := mux.NewRouter()
 
 	router.HandleFunc("/api/user/new", controllers.CreateAccount).Methods("POST")

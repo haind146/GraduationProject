@@ -4,18 +4,21 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
+const TYPE_PAYMENT  = 1
+const TYPE_SWEEP  = 2
+
 type Transaction struct {
 	gorm.Model
-	OrderId string `json:"order_id"`
+	OrderId uint `json:"order_id"`
 	TransactionHash string `gorm:"type:varchar(100);unique_index"`
 	From string `gorm:"type:varchar(100);index"`
 	To string `gorm:"type:varchar(100);index"`
-	Value uint `json:"value"`
+	Value float64 `json:"value"`
 	Fee uint `json:"fee"`
-	BlockHash uint `json:"block_hash"`
+	BlockHash string `json:"block_hash"`
 	BlockNumber uint `json:"block_number"`
 	Type uint `json:"type"`
-	PaymentMethodIs uint `json:"payment_method_id"`
+	PaymentMethodId uint `json:"payment_method_id"`
 }
 
 

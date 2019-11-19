@@ -4,12 +4,14 @@ import (
 	"crypt-coin-payment/service"
 	u "crypt-coin-payment/utils"
 	"github.com/jinzhu/gorm"
+	"strconv"
 )
 
 type Order struct {
 	gorm.Model
 	PartnerOrderId string `json:"partner_order_id"`
-	Amount uint `json:"amount"`
+	Amount float64 `json:"amount"`
+	ReceivedValue float64 `json:"receive"`
 	ReceiveAddress string `gorm:"type:varchar(100);unique_index"`
 	PaymentMethodId uint `json:"payment_method_id"`
 	ApplicationId uint `json:"application_id"`
@@ -34,7 +36,7 @@ func (order *Order) Validate() (map[string] interface{}, bool) {
 	return u.Message(true, "success"), true
 }
 
-func (order *Order) Create() (map[string] interface{}) {
+func (order *Order) Create() map[string] interface{} {
 
 	if resp, ok := order.Validate(); !ok {
 		return resp
@@ -56,6 +58,16 @@ func (order *Order) Create() (map[string] interface{}) {
 	appPubKey.NumOfAddressGenerated = appPubKey.NumOfAddressGenerated + 1
 
 	GetDB().Create(order)
+
+	address := &Address{
+		Address: receiveAddress,
+		OrderId: order.ID,
+		Balance: 0,
+		PendingReceive: 0,
+		PendingSent: 0,
+		MnemonicPath: strconv.Itoa(int(appPubKey.Index)) + "/" + strconv.Itoa(int(appPubKey.NumOfAddressGenerated -1)),
+	}
+	GetDB().Create(address)
 	GetDB().Save(appPubKey)
 	resp := u.Message(true, "success")
 	resp["order"] = order
