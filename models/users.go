@@ -1,13 +1,12 @@
 package models
 
 import (
-	"github.com/dgrijalva/jwt-go"
 	u "crypt-coin-payment/utils"
-	"strings"
+	"github.com/dgrijalva/jwt-go"
 	"github.com/jinzhu/gorm"
-	"os"
 	"golang.org/x/crypto/bcrypt"
-	"fmt"
+	"os"
+	"strings"
 )
 
 /*
@@ -65,9 +64,7 @@ func (user *User) Create() (map[string] interface{}) {
 
 	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 	user.Password = string(hashedPassword)
-
 	registerUser := GetRegisterUserByEmail(user.Email)
-	fmt.Print(user.RegisterKey)
 
 	if len(user.RegisterKey) != 64 || user.RegisterKey != registerUser.RegisterKey {
 		return u.Message(false, "This user has not accepted to register new account")

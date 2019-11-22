@@ -19,9 +19,9 @@ type Address struct {
 //	GetDB().Create(address)
 //}
 
-func GetAddress(addr string) (*Address) {
+func GetAddress(addr string) *Address {
 	address := &Address{}
-	err := GetDB().Table("addresses").Where("address = ?", address).First(address).Error
+	err := GetDB().Table("addresses").Where("address = ?", addr).First(address).Error
 	if err != nil {
 		return nil
 	}

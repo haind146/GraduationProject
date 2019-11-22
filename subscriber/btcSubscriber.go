@@ -1,6 +1,7 @@
 package subscriber
 
 import (
+	"crypt-coin-payment/blockchain"
 	"crypt-coin-payment/models"
 	zmq "github.com/pebbe/zmq4"
 	"log"
@@ -40,22 +41,25 @@ func (subscriber *BtcSubscriber) Subscribe() error {
 }
 
 func HandleNewTransaction(rawTx []byte)  {
-	rpcClient := GetRpcClient(1)
+	rpcClient := blockchain.GetBtcRpcClient(1)
 	tx, err := rpcClient.DecodeRawTransaction(rawTx)
 	if err != nil {
 		log.Println(err)
+		return
+	}
+	existTxInDb := models.GetTransaction(tx.Hash)
+	if existTxInDb != nil {
 		return
 	}
 
 	for _, vout := range tx.Vout  {
 		for _, address := range vout.ScriptPubKey.Addresses {
 			addressModel := models.GetAddress(address)
-			dbTx := models.GetDB().Begin()
 			if addressModel != nil {
+				dbTx := models.GetDB().Begin()
 				transaction := &models.Transaction{
 					OrderId:         addressModel.OrderId,
 					TransactionHash: tx.Hash,
-					From:            nil,
 					To:              address,
 					Value:           vout.Value,
 					BlockHash:       tx.BlockHash,
@@ -63,18 +67,18 @@ func HandleNewTransaction(rawTx []byte)  {
 					PaymentMethodId: 1,
 				}
 				err = dbTx.Create(transaction).Error
-			}
-			order := models.FindOrderByAddress(address)
-			order.ReceivedValue += vout.Value
-			err = dbTx.Save(order).Error
-			if err != nil {
-				log.Println(err)
-				dbTx.Rollback()
-			} else {
-				dbTx.Commit()
+				order := models.FindOrderByAddress(address)
+				order.ReceivedValue += vout.Value
+				err = dbTx.Save(order).Error
+				if err != nil {
+					log.Println(err)
+					dbTx.Rollback()
+				} else {
+					dbTx.Commit()
+				}
+				break
 			}
 		}
 	}
-
 	//log.Println(tx)
 }

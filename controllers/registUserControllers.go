@@ -24,7 +24,7 @@ var CreateRegisterUser = func(w http.ResponseWriter, r *http.Request) {
 var AcceptRegisterUser = func(w http.ResponseWriter, r *http.Request) {
 	userId := r.Context().Value("user") . (uint)
 	user := models.GetUser(userId)
-	if(user.RoleId != ADMIN_ROLE) {
+	if user.RoleId != ADMIN_ROLE {
 		u.Respond(w, u.Message(false, "User permission denied"))
 		return
 	}

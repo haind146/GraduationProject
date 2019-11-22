@@ -16,6 +16,7 @@ require (
 	github.com/lib/pq v1.0.0 // indirect
 	github.com/mattn/go-sqlite3 v1.12.0 // indirect
 	github.com/pebbe/zmq4 v1.0.0
+	github.com/robfig/cron/v3 v3.0.0 // indirect
 	golang.org/x/crypto v0.0.0-20190325154230-a5d413f7728c
 	google.golang.org/appengine v1.6.5 // indirect
 )

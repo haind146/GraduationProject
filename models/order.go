@@ -1,7 +1,7 @@
 package models
 
 import (
-	"crypt-coin-payment/service"
+	"crypt-coin-payment/keychain"
 	u "crypt-coin-payment/utils"
 	"github.com/jinzhu/gorm"
 	"strconv"
@@ -47,7 +47,7 @@ func (order *Order) Create() map[string] interface{} {
 		return u.Message(false, "App public key not found")
 	}
 
-	keyService := service.KeyFactory(1)
+	keyService := keychain.KeyFactory(1)
 	receiveAddress, err := keyService.GenerateAddressFromAccount(appPubKey.PublicKey, uint32(appPubKey.NumOfAddressGenerated))
 	if err != nil {
 		u.Message(false, "Error when generate address")

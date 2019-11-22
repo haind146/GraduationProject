@@ -2,6 +2,7 @@ package main
 
 import (
 	"crypt-coin-payment/app"
+	"crypt-coin-payment/blockchain"
 	"crypt-coin-payment/controllers"
 	"crypt-coin-payment/subscriber"
 	"fmt"
@@ -39,6 +40,13 @@ func main() {
 
 	subscribe := subscriber.SubscriberFactory(1)
 	go subscribe.Subscribe()
+
+	//cronTab := cron.New()
+	//cronTab.AddFunc("*/1 * * * *", func() {
+	//	blockchain.ScanBlock(1)
+	//})
+	//cronTab.Start()
+	blockchain.ScanBlock(1)
 
 	err := http.ListenAndServe(":" + port, router) //Launch the app, visit localhost:8000/api
 	if err != nil {

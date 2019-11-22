@@ -1,7 +1,7 @@
 package models
 
 import (
-	"crypt-coin-payment/service"
+	"crypt-coin-payment/keychain"
 	u "crypt-coin-payment/utils"
 	"fmt"
 	"github.com/jinzhu/gorm"
@@ -44,7 +44,7 @@ func (application *Application) Create() (map[string] interface{}) {
 	applicationPublicKey := &ApplicationPublicKey{}
 
 	masterPublicKey := GetMasterPublicKeyByUser(application.UserId)
-	keyService := service.KeyFactory(1)
+	keyService := keychain.KeyFactory(1)
 	genNumber := GetUserApplicationCount(application.UserId)
 	appPublicKey, err := keyService.GenerateAccountFromMasterPubKey(masterPublicKey.PublicKey, uint32(genNumber))
 	if err != nil {
