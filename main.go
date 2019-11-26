@@ -2,11 +2,10 @@ package main
 
 import (
 	"crypt-coin-payment/app"
-	"crypt-coin-payment/blockchain"
 	"crypt-coin-payment/controllers"
-	"crypt-coin-payment/subscriber"
 	"fmt"
 	"github.com/gorilla/mux"
+	"github.com/rs/cors"
 	"net/http"
 	"os"
 	"runtime"
@@ -31,6 +30,12 @@ func main() {
 
 	//router.NotFoundHandler = app.NotFoundHandler
 
+	c := cors.New(cors.Options{
+		AllowedOrigins: []string{"http://localhost:8080"},
+		AllowCredentials: true,
+	})
+	handler := c.Handler(router)
+
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8000" //localhost
@@ -38,17 +43,17 @@ func main() {
 
 	fmt.Println(port)
 
-	subscribe := subscriber.SubscriberFactory(1)
-	go subscribe.Subscribe()
+	//subscribe := subscriber.SubscriberFactory(1)
+	//go subscribe.Subscribe()
 
 	//cronTab := cron.New()
 	//cronTab.AddFunc("*/1 * * * *", func() {
 	//	blockchain.ScanBlock(1)
 	//})
 	//cronTab.Start()
-	blockchain.ScanBlock(1)
+	//blockchain.ScanBlock(1)
 
-	err := http.ListenAndServe(":" + port, router) //Launch the app, visit localhost:8000/api
+	err := http.ListenAndServe(":" + port, handler) //Launch the app, visit localhost:8000/api
 	if err != nil {
 		fmt.Print(err)
 	}

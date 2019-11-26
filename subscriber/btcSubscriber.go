@@ -16,25 +16,25 @@ func (subscriber *BtcSubscriber) Subscribe() error {
 	if err != nil {
 		return err
 	}
-	log.Println("websocket connected")
 	defer socket.Close()
 	err = socket.Connect(subscriber.ZmqPubEndpoint)
 	if err != nil {
-		log.Println(err)
+		log.Println("SocketConnect", err)
 		return err
 	}
 	err = socket.SetSubscribe("rawtx")
 	if err != nil {
-		log.Println(err)
+		log.Println("SetSubscribe", err)
 		return err
 	}
 
 	for {
 		msg, e := socket.RecvMessageBytes(0)
 		if e != nil {
-			log.Println(e)
+			log.Println("RecvMessageBytes", e)
 			break
 		}
+		log.Println(msg[1])
 		go HandleNewTransaction(msg[1])
 	}
 	return nil
@@ -47,6 +47,7 @@ func HandleNewTransaction(rawTx []byte)  {
 		log.Println(err)
 		return
 	}
+	log.Println(tx.Hash)
 	existTxInDb := models.GetTransaction(tx.Hash)
 	if existTxInDb != nil {
 		return
