@@ -5,9 +5,10 @@ import (
 	"log"
 )
 
-func ScanBlock(paymentMethodId uint)  {
+func ScanBlock(paymentMethodId uint) {
 	facadeInstance := GetFacadeInterface(paymentMethodId)
 	var currentBlockNumber int64
+	var currentBlockHash string
 	lastBlock := models.GetLatestBlock(paymentMethodId)
 	if lastBlock == nil {
 		blockHash, blockNumber, err := facadeInstance.GetBestBlock()
@@ -21,28 +22,33 @@ func ScanBlock(paymentMethodId uint)  {
 			return
 		}
 		currentBlockNumber = blockNumber
+		currentBlockHash = blockHash
+
 	} else {
 		currentBlockNumber = lastBlock.BlockNumber
 	}
-	if currentBlockNumber > 0 {
-		nextBlock, err := facadeInstance.GetBlockHash(currentBlockNumber + 1)
-		if nextBlock == "" || err != nil {
+	for {
+		nextBlockHash, isValid, err := facadeInstance.NextBlock(currentBlockNumber, currentBlockHash)
+		if err != nil || nextBlockHash == "" {
 			return
 		}
-		nextBlockHash, isValid, err := facadeInstance.NextBlock(currentBlockNumber+1, nextBlock)
 		if nextBlockHash != "" && isValid {
 			err := facadeInstance.ApplyNextBlock(nextBlockHash, currentBlockNumber+1)
 			if err != nil {
 				log.Println("ApplyNextBlock", err)
 				return
 			}
+			currentBlockNumber++
+			currentBlockHash = nextBlockHash
 		}
 		if !isValid {
 			err := facadeInstance.RevertBlock(currentBlockNumber)
 			if err != nil {
 				log.Println("Revert Block", err)
-				return
 			}
+			return
 		}
 	}
+
+
 }

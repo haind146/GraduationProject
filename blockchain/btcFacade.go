@@ -64,9 +64,9 @@ func (btcFacade *BtcFacade) NextBlock(blockHeight int64, blockHash string) (stri
 		return "", true, err
 	}
 	if strings.Compare(blockHash, nextBlockHeader.PrevBlock.String()) != 0 {
-		return nextBlockHeader.BlockHash().String(), false, err
+		return nextBlockHeader.BlockHash().String(), false, nil
 	} else {
-		return nextBlockHeader.BlockHash().String(), true, err
+		return nextBlockHeader.BlockHash().String(), true, nil
 	}
 }
 
