@@ -2,9 +2,12 @@ package main
 
 import (
 	"crypt-coin-payment/app"
+	"crypt-coin-payment/blockchain"
 	"crypt-coin-payment/controllers"
+	"crypt-coin-payment/subscriber"
 	"fmt"
 	"github.com/gorilla/mux"
+	"github.com/robfig/cron/v3"
 	"github.com/rs/cors"
 	"net/http"
 	"os"
@@ -43,14 +46,14 @@ func main() {
 
 	fmt.Println(port)
 
-	//subscribe := subscriber.SubscriberFactory(1)
-	//go subscribe.Subscribe()
+	subscribe := subscriber.SubscriberFactory(1)
+	go subscribe.Subscribe()
 
-	//cronTab := cron.New()
-	//cronTab.AddFunc("*/1 * * * *", func() {
-	//	blockchain.ScanBlock(1)
-	//})
-	//cronTab.Start()
+	cronTab := cron.New()
+	cronTab.AddFunc("*/1 * * * *", func() {
+		blockchain.ScanBlock(1)
+	})
+	cronTab.Start()
 	//blockchain.ScanBlock(1)
 
 	err := http.ListenAndServe(":" + port, handler) //Launch the app, visit localhost:8000/api

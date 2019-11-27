@@ -40,8 +40,8 @@ func (registerUser *RegisterUser) Create() (map[string] interface{}) {
 
 	registerUser.Status = UNACTIVE
 	createResult := GetDB().Create(registerUser)
-	if(createResult.Error != nil) {
-		return u.Message(false, "Email have already been used")
+	if createResult.Error != nil {
+		return u.Message(false, "Email already  used")
 	}
 
 	resp := u.Message(true, "success")

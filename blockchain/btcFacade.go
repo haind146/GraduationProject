@@ -74,6 +74,7 @@ func (btcFacade *BtcFacade) ApplyNextBlock(blockHash string, blockHeight int64) 
 	hash, err := chainhash.NewHashFromStr(blockHash)
 	block, err := BtcRpcClient.GetBlock(hash)
 	if err != nil {
+		log.Println("GetBlock", err)
 		return err
 	}
 	db := models.GetDB()

@@ -34,7 +34,6 @@ func (subscriber *BtcSubscriber) Subscribe() error {
 			log.Println("RecvMessageBytes", e)
 			break
 		}
-		log.Println(msg[1])
 		go HandleNewTransaction(msg[1])
 	}
 	return nil
@@ -47,7 +46,6 @@ func HandleNewTransaction(rawTx []byte)  {
 		log.Println(err)
 		return
 	}
-	log.Println(tx.Hash)
 	existTxInDb := models.GetTransaction(tx.Hash)
 	if existTxInDb != nil {
 		return
