@@ -26,6 +26,7 @@ func ScanBlock(paymentMethodId uint) {
 
 	} else {
 		currentBlockNumber = lastBlock.BlockNumber
+		currentBlockHash = lastBlock.BlockHash
 	}
 	for {
 		nextBlockHash, isValid, err := facadeInstance.NextBlock(currentBlockNumber, currentBlockHash)

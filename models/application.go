@@ -44,6 +44,9 @@ func (application *Application) Create() (map[string] interface{}) {
 	applicationPublicKey := &ApplicationPublicKey{}
 
 	masterPublicKey := GetMasterPublicKeyByUser(application.UserId)
+	if masterPublicKey == nil {
+
+	}
 	keyService := keychain.KeyFactory(1)
 	genNumber := GetUserApplicationCount(application.UserId)
 	appPublicKey, err := keyService.GenerateAccountFromMasterPubKey(masterPublicKey.PublicKey, uint32(genNumber))

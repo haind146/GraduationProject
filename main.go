@@ -49,7 +49,9 @@ func main() {
 	subscribe := subscriber.SubscriberFactory(1)
 	go subscribe.Subscribe()
 
-	cronTab := cron.New()
+	cronTab := cron.New(cron.WithChain(
+		cron.SkipIfStillRunning(cron.DefaultLogger),
+	))
 	cronTab.AddFunc("*/1 * * * *", func() {
 		blockchain.ScanBlock(1)
 	})

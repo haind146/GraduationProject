@@ -85,7 +85,7 @@ func (btcFacade *BtcFacade) ApplyNextBlock(blockHash string, blockHeight int64) 
 	}
 	err = db.Create(blockModel).Error
 	if err != nil {
-		log.Println(err)
+		log.Println("createBlock", err)
 		return err
 	}
 	for _, tx := range block.Transactions {
