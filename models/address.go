@@ -10,8 +10,8 @@ type Address struct {
 	PaymentMethodId uint `json:"payment_method_id"`
 	OrderId uint `json:"order_id"`
 	Balance uint `json:"balance"`
-	PendingSent uint `json:"pending_sent"`
-	PendingReceive uint `json:"pending_receive"`
+	PendingSent float64 `json:"pending_sent"`
+	PendingReceive float64 `json:"pending_receive"`
 	MnemonicPath string `json:"mnemonic_path"`
 }
 

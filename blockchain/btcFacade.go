@@ -2,6 +2,7 @@ package blockchain
 
 import (
 	"crypt-coin-payment/models"
+	"fmt"
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/btcsuite/btcd/chaincfg/chainhash"
 	"github.com/btcsuite/btcd/rpcclient"
@@ -100,24 +101,27 @@ func (btcFacade *BtcFacade) ApplyNextBlock(blockHash string, blockHeight int64) 
 				if len(addresses) == 1 {
 					addressInDb := models.GetAddress(addresses[0].String())
 					if addressInDb != nil {
-						newTx := models.Transaction{
+						newTx := &models.Transaction{
 							OrderId:         addressInDb.OrderId,
 							TransactionHash: tx.TxHash().String(),
 							To:              addressInDb.Address,
-							Value:           float64(vout.Value),
+							Value:           float64(vout.Value)/100000000,
 							BlockHash:       blockHash,
 							BlockNumber:     uint(blockHeight),
 							Type:            models.TYPE_PAYMENT,
 							PaymentMethodId: 1,
 						}
-						db.Create(newTx)
+						err = db.Create(newTx).Error
+						log.Println("CreateTx", err)
 					}
 				}
 			}
 		} else {
 			txInDb.BlockHash = blockHash
 			txInDb.BlockNumber = uint(blockHeight)
-			db.Save(txInDb)
+			fmt.Println(txInDb)
+			err = db.Save(txInDb).Error
+			log.Println("SaveTx", err)
 		}
 	}
 	return nil
@@ -144,4 +148,8 @@ func (btcFacade *BtcFacade) RevertBlock(blockNumber int64) error  {
 		}
 	}
 	return nil
+}
+
+func ImportAddress(address string) error  {
+	return GetBtcRpcClient(1).ImportAddress(address)
 }

@@ -23,7 +23,10 @@ func main() {
 	router.HandleFunc("/api/user/accept-register", controllers.AcceptRegisterUser).Methods("POST")
 	router.HandleFunc("/api/user/import-master-pubkey", controllers.CreateMasterPublicKey).Methods("POST")
 	router.HandleFunc("/api/user/application/create", controllers.CreateApplication).Methods("POST")
+	router.HandleFunc("/api/user/application/list", controllers.GetApplicationsList).Methods("GET")
 	router.HandleFunc("/api/user/order/create", controllers.CreateOrder).Methods("POST")
+	router.HandleFunc("/api/user/order/list", controllers.GetOrdersList).Methods("GET")
+	router.HandleFunc("/api/user/order/transactions", controllers.GetTransactionsByOrder).Methods("GET")
 	//router.HandleFunc("/api/user/wallet/change", controllers.AcceptRegisterUser).Methods("POST")
 	router.HandleFunc("/api/user/login", controllers.Authenticate).Methods("POST")
 	router.HandleFunc("/api/contacts/new", controllers.CreateContact).Methods("POST")
@@ -35,6 +38,7 @@ func main() {
 
 	c := cors.New(cors.Options{
 		AllowedOrigins: []string{"http://localhost:8080"},
+		AllowedHeaders: []string{"*"},
 		AllowCredentials: true,
 	})
 	handler := c.Handler(router)

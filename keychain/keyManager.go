@@ -1,7 +1,6 @@
 package keychain
 
 import (
-	"errors"
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/btcsuite/btcutil/hdkeychain"
 )
@@ -38,9 +37,6 @@ func (btcKey *BtcKey) GenerateAccountFromMasterPubKey(masterPubKeyStr string, in
 	masterPubKey, err := hdkeychain.NewKeyFromString(masterPubKeyStr)
 	if err != nil {
 		return "", err
-	}
-	if masterPubKey.Depth() > 0 {
-		return "", errors.New("Not a master public key")
 	}
 	account, err := masterPubKey.Child(index)
 	return account.String(), nil

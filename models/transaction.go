@@ -31,6 +31,7 @@ func GetTransaction(txHash string) *Transaction {
 	tx := &Transaction{}
 	err := GetDB().Table("transactions").Where("transaction_hash = ?", txHash).First(tx).Error
 	if err != nil {
+		//log.Println("GetTransaction", err)
 		return nil
 	}
 	return tx
@@ -56,4 +57,14 @@ func RevertTransactionInBlock(blockNumber uint, paymentMethodId uint) error  {
 	}
 	dbTx.Commit()
 	return nil
+}
+
+func TransactionsByOrder(orderId uint) []*Transaction {
+	transactions := make([]*Transaction, 0)
+	err := GetDB().Table("transactions").Where("order_id = ?", orderId).Find(&transactions).Error
+	if err != nil {
+		log.Println("TransactionsByAddress", err)
+		return nil
+	}
+	return transactions
 }

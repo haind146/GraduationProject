@@ -22,3 +22,11 @@ var CreateApplication = func(w http.ResponseWriter, r *http.Request) {
 	resp := application.Create()
 	u.Respond(w, resp)
 }
+
+var GetApplicationsList = func(w http.ResponseWriter, r *http.Request) {
+	id := r.Context().Value("user") . (uint)
+	data := models.ApplicationsList(id)
+	resp := u.Message(true, "success")
+	resp["data"] = data
+	u.Respond(w, resp)
+}

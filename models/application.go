@@ -5,6 +5,7 @@ import (
 	u "crypt-coin-payment/utils"
 	"fmt"
 	"github.com/jinzhu/gorm"
+	"log"
 )
 
 type Application struct {
@@ -45,12 +46,13 @@ func (application *Application) Create() (map[string] interface{}) {
 
 	masterPublicKey := GetMasterPublicKeyByUser(application.UserId)
 	if masterPublicKey == nil {
-
+		return u.Message(false, "You must import your extend public key first")
 	}
 	keyService := keychain.KeyFactory(1)
 	genNumber := GetUserApplicationCount(application.UserId)
 	appPublicKey, err := keyService.GenerateAccountFromMasterPubKey(masterPublicKey.PublicKey, uint32(genNumber))
 	if err != nil {
+		log.Println("GenerateAccountFromMasterPubKey", err)
 		return u.Message(false, "Master public key not found")
 	}
 
@@ -96,5 +98,15 @@ func GetApplicationPubicKey(applicationId uint) (*ApplicationPublicKey)  {
 		return nil
 	}
 	return appPubKey
+}
+
+func ApplicationsList(userId uint) []*Application {
+	applications := make([]*Application, 0)
+	err := GetDB().Table("applications").Where("user_id = ?", userId).Find(&applications).Error
+	if err != nil {
+		log.Println("ApplicationList", err)
+		return nil
+	}
+	return applications
 }
 

@@ -3,8 +3,17 @@ package models
 import (
 	"crypt-coin-payment/keychain"
 	u "crypt-coin-payment/utils"
+	"fmt"
 	"github.com/jinzhu/gorm"
+	"log"
 	"strconv"
+)
+
+const (
+	ORDER_CREATED = 1
+	ORDER_MEMPOOL = 2
+	ORDER_INBLOCK = 3
+	ORDER_SWEEPED = 4
 )
 
 type Order struct {
@@ -50,11 +59,15 @@ func (order *Order) Create() map[string] interface{} {
 	keyService := keychain.KeyFactory(1)
 	receiveAddress, err := keyService.GenerateAddressFromAccount(appPubKey.PublicKey, uint32(appPubKey.NumOfAddressGenerated))
 	if err != nil {
-		u.Message(false, "Error when generate address")
+		return u.Message(false, "Error when generate address")
 	}
+	//err = blockchain.ImportAddress(receiveAddress)
+	//if err != nil {
+	//	return u.Message(false, "Error when import address to node")
+	//}
 
 	order.ReceiveAddress = receiveAddress
-	order.Status = 0
+	order.Status = ORDER_CREATED
 	appPubKey.NumOfAddressGenerated = appPubKey.NumOfAddressGenerated + 1
 
 	GetDB().Create(order)
@@ -67,7 +80,8 @@ func (order *Order) Create() map[string] interface{} {
 		PendingSent: 0,
 		MnemonicPath: strconv.Itoa(int(appPubKey.Index)) + "/" + strconv.Itoa(int(appPubKey.NumOfAddressGenerated -1)),
 	}
-	GetDB().Create(address)
+	err = GetDB().Create(address).Error
+	fmt.Println("Create Address", err)
 	GetDB().Save(appPubKey)
 	resp := u.Message(true, "success")
 	resp["order"] = order
@@ -81,4 +95,14 @@ func FindOrderByAddress (address string) *Order {
 		return nil
 	}
 	return order
+}
+
+func OrdersList(appId uint) []*Order {
+	orders := make([]*Order, 0)
+	err := GetDB().Table("orders").Where("application_id = ?", appId).Find(&orders).Error
+	if err != nil {
+		log.Println("OrdersList", err)
+		return nil
+	}
+	return orders
 }

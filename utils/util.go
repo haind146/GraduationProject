@@ -37,5 +37,5 @@ func Generate64BytesRandom() string {
 func ValidateMasterPublicKey(pubKeyStr string) bool  {
 	masterPublicKey, err := hdkeychain.NewKeyFromString(pubKeyStr)
 	fmt.Println(err)
-	return err == nil && !masterPublicKey.IsPrivate() && masterPublicKey.Depth() == 0
+	return err == nil && !masterPublicKey.IsPrivate() && masterPublicKey.Depth() == 2
 }
