@@ -29,8 +29,10 @@ func main() {
 	router.HandleFunc("/api/user/order/transactions", controllers.GetTransactionsByOrder).Methods("GET")
 	//router.HandleFunc("/api/user/wallet/change", controllers.AcceptRegisterUser).Methods("POST")
 	router.HandleFunc("/api/user/login", controllers.Authenticate).Methods("POST")
-	router.HandleFunc("/api/contacts/new", controllers.CreateContact).Methods("POST")
-	router.HandleFunc("/api/me/contacts", controllers.GetContactsFor).Methods("GET") //  user/2/contacts
+	router.HandleFunc("/api/user/sweep-money", controllers.GetSweepMoneyInfo).Methods("GET")
+	//router.HandleFunc("/api/user/send-transsaction", controllers.).Methods("POST")
+	//router.HandleFunc("/api/contacts/new", controllers.CreateContact).Methods("POST")
+	//router.HandleFunc("/api/me/contacts", controllers.GetContactsFor).Methods("GET") //  user/2/contacts
 
 	router.Use(app.JwtAuthentication) //attach JWT auth middleware
 
@@ -66,4 +68,5 @@ func main() {
 	if err != nil {
 		fmt.Print(err)
 	}
+
 }

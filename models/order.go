@@ -97,6 +97,15 @@ func FindOrderByAddress (address string) *Order {
 	return order
 }
 
+func FindOrerById(id uint) *Order {
+	order := &Order{}
+	err := GetDB().First(order, id).Error
+	if err != nil {
+		return nil
+	}
+	return order
+}
+
 func OrdersList(appId uint) []*Order {
 	orders := make([]*Order, 0)
 	err := GetDB().Table("orders").Where("application_id = ?", appId).Find(&orders).Error

@@ -4,7 +4,6 @@ import (
 	"crypt-coin-payment/blockchain"
 	"crypt-coin-payment/models"
 	"encoding/hex"
-	"fmt"
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/btcsuite/btcd/chaincfg/chainhash"
 	"github.com/btcsuite/btcd/txscript"
@@ -19,6 +18,7 @@ type BtcSubscriber struct {
 func (subscriber *BtcSubscriber) Subscribe() error {
 	socket, err := zmq.NewSocket(zmq.SUB)
 	if err != nil {
+		log.Println("Subcribe", err)
 		return err
 	}
 	defer socket.Close()
@@ -58,13 +58,12 @@ func HandleNewTransaction(hash *chainhash.Hash)  {
 		return
 	}
 
-	for _, vout := range tx.MsgTx().TxOut  {
+	for outputIndex, vout := range tx.MsgTx().TxOut  {
 		_, addresses, _, err := txscript.ExtractPkScriptAddrs(vout.PkScript, &chaincfg.TestNet3Params)
 		for _, address := range addresses {
 			addressModel := models.GetAddress(address.String())
 
 			if addressModel != nil {
-				fmt.Println(addressModel.Address)
 				dbTx := models.GetDB().Begin()
 				transaction := &models.Transaction{
 					OrderId:         addressModel.OrderId,
@@ -74,13 +73,23 @@ func HandleNewTransaction(hash *chainhash.Hash)  {
 					Type:            models.TYPE_PAYMENT,
 					PaymentMethodId: 1,
 				}
+
 				err = dbTx.Create(transaction).Error
+				utxo := &models.Utxo{
+					TxId:        transaction.ID,
+					OutputIndex: uint(outputIndex),
+					Value:       float64(vout.Value)/100000000,
+					Spent:       false,
+				}
+				err = dbTx.Create(utxo).Error
+
 				log.Println(err)
 				order := models.FindOrderByAddress(address.String())
 				order.ReceivedValue += transaction.Value
+				order.Status = models.ORDER_MEMPOOL
 				err = dbTx.Save(order).Error
 				if err != nil {
-					log.Println(err)
+					log.Println("Save Order", err)
 					dbTx.Rollback()
 				} else {
 					dbTx.Commit()

@@ -100,6 +100,7 @@ func GetApplicationPubicKey(applicationId uint) (*ApplicationPublicKey)  {
 	return appPubKey
 }
 
+
 func ApplicationsList(userId uint) []*Application {
 	applications := make([]*Application, 0)
 	err := GetDB().Table("applications").Where("user_id = ?", userId).Find(&applications).Error
@@ -110,3 +111,10 @@ func ApplicationsList(userId uint) []*Application {
 	return applications
 }
 
+type SweepInformation struct {
+	TxId string `json:"tx_id"`
+	RawTx string `json:"raw_tx"`
+	Vout  uint   `json:"vout"`
+	Value float64 `json:"value"`
+	AddressPath string `json:"address_path"`
+}

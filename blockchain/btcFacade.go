@@ -1,7 +1,9 @@
 package blockchain
 
 import (
+	"bytes"
 	"crypt-coin-payment/models"
+	"encoding/hex"
 	"fmt"
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/btcsuite/btcd/chaincfg/chainhash"
@@ -75,7 +77,7 @@ func (btcFacade *BtcFacade) ApplyNextBlock(blockHash string, blockHeight int64) 
 	hash, err := chainhash.NewHashFromStr(blockHash)
 	block, err := BtcRpcClient.GetBlock(hash)
 	if err != nil {
-		log.Println("GetBlock", err)
+		log.Println("GetBlock", hash.String(), err)
 		return err
 	}
 	db := models.GetDB()
@@ -84,6 +86,7 @@ func (btcFacade *BtcFacade) ApplyNextBlock(blockHash string, blockHeight int64) 
 		BlockNumber:     blockHeight,
 		PaymentMethodId: 1,
 	}
+
 	err = db.Create(blockModel).Error
 	if err != nil {
 		log.Println("createBlock", err)
@@ -92,7 +95,7 @@ func (btcFacade *BtcFacade) ApplyNextBlock(blockHash string, blockHeight int64) 
 	for _, tx := range block.Transactions {
 		txInDb := models.GetTransaction(tx.TxHash().String())
 		if txInDb == nil {
-			for _, vout := range tx.TxOut {
+			for outputIndex, vout := range tx.TxOut {
 				_, addresses, _, err := txscript.ExtractPkScriptAddrs(vout.PkScript, &chaincfg.TestNet3Params)
 				if err != nil {
 					log.Println(err)
@@ -112,17 +115,45 @@ func (btcFacade *BtcFacade) ApplyNextBlock(blockHash string, blockHeight int64) 
 							PaymentMethodId: 1,
 						}
 						err = db.Create(newTx).Error
-						log.Println("CreateTx", err)
+						if err != nil {
+							log.Println("CreateTx", err)
+						}
+
+						utxo := &models.Utxo{
+							TxId:        newTx.ID,
+							OutputIndex: uint(outputIndex),
+							Value:       float64(vout.Value)/100000000,
+							Spent:       false,
+						}
+						err = db.Create(utxo).Error
+
+						order := models.FindOrerById(addressInDb.OrderId)
+						order.Status = models.ORDER_INBLOCK
+						order.ReceivedValue += newTx.Value
+						err = db.Save(order).Error
+						if err != nil {
+							log.Println("SaveOrder", err)
+						}
 					}
 				}
 			}
 		} else {
 			txInDb.BlockHash = blockHash
 			txInDb.BlockNumber = uint(blockHeight)
-			fmt.Println(txInDb)
+			order := models.FindOrerById(txInDb.OrderId)
+
+			fmt.Println("sadfsaf", txInDb.OrderId)
+			order.Status = models.ORDER_INBLOCK
+			err = db.Save(order).Error
+			if err != nil {
+				log.Println("SaveOrder", err)
+			}
 			err = db.Save(txInDb).Error
-			log.Println("SaveTx", err)
+			if err != nil {
+				log.Println("SaveTx", err)
+			}
 		}
+
 	}
 	return nil
 }
@@ -152,4 +183,51 @@ func (btcFacade *BtcFacade) RevertBlock(blockNumber int64) error  {
 
 func ImportAddress(address string) error  {
 	return GetBtcRpcClient(1).ImportAddress(address)
+}
+
+func GetRawTransaction(txHash string) string {
+	txhash, _ := chainhash.NewHashFromStr(txHash)
+	rawTx, _ := BtcRpcClient.GetRawTransaction(txhash)
+	txHex := ""
+	if rawTx != nil {
+		// Serialize the transaction and convert to hex string.
+		buf := bytes.NewBuffer(make([]byte, 0, rawTx.MsgTx().SerializeSize()))
+		if err := rawTx.MsgTx().Serialize(buf); err != nil {
+			log.Println("Serialize Transaction", err)
+		}
+		txHex = hex.EncodeToString(buf.Bytes())
+	}
+	return txHex
+}
+
+func SweepInfo(appId uint) []*models.SweepInformation {
+	orders := make([]*models.Order, 0)
+	err := models.GetDB().Table("orders").Where("application_id = ? and status = ?", appId, models.ORDER_INBLOCK).Find(&orders).Error
+	if err != nil {
+		log.Println("Get orders to sweep", err)
+		return nil
+	}
+
+	sweepInformations := make([]*models.SweepInformation, 0)
+
+	for _, order := range orders {
+		transactions := make([]*models.Transaction, 0)
+		models.GetDB().Where("order_id = ?", order.ID).Find(&transactions)
+		for _, transaction := range transactions {
+			utxo := &models.Utxo{}
+			models.GetDB().Where("tx_id = ?", transaction.ID).First(utxo)
+			if !utxo.Spent {
+				sweepInformation := &models.SweepInformation{}
+				sweepInformation.RawTx = GetRawTransaction(transaction.TransactionHash)
+				address := &models.Address{}
+				models.GetDB().Where("order_id = ?", order.ID).First(address)
+				sweepInformation.AddressPath = address.MnemonicPath
+				sweepInformation.Vout = utxo.OutputIndex
+				sweepInformation.TxId = transaction.TransactionHash
+				sweepInformation.Value = utxo.Value
+				sweepInformations = append(sweepInformations, sweepInformation)
+			}
+		}
+	}
+	return sweepInformations
 }

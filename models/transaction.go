@@ -22,6 +22,14 @@ type Transaction struct {
 	PaymentMethodId uint `json:"payment_method_id"`
 }
 
+type Utxo struct {
+	gorm.Model
+	TxId uint `json:"tx_id"`
+	OutputIndex uint `json:"output_index"`
+	Value float64 `json:"value"`
+	Spent bool `json:"spent"`
+}
+
 
 func (transaction *Transaction) Create() error {
 	result := GetDB().Create(transaction)
