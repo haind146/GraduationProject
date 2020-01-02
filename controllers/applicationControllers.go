@@ -4,6 +4,7 @@ import (
 	"crypt-coin-payment/blockchain"
 	"crypt-coin-payment/models"
 	"encoding/json"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -50,5 +51,25 @@ var GetSweepMoneyInfo = func(w http.ResponseWriter, r *http.Request) {
 	data := blockchain.SweepInfo(uint(applicationId))
 	resp := u.Message(true, "success")
 	resp["data"] = data
+	u.Respond(w, resp)
+}
+
+var SendRawTransaction = func(w http.ResponseWriter, r *http.Request) {
+	type RawTx struct {
+		RawTx string `json:"raw_tx"`
+	}
+	rawTx := &RawTx{}
+	err := json.NewDecoder(r.Body).Decode(rawTx)
+	if err != nil {
+		log.Println("SendRawTransaction", err)
+	}
+	txhash, err :=  blockchain.SendRawTransaction(rawTx.RawTx)
+	if err != nil {
+		resp := u.Message(true, "Error when decode transactions")
+		u.Respond(w, resp)
+		return
+	}
+	resp := u.Message(true, "success")
+	resp["txhash"] = txhash
 	u.Respond(w, resp)
 }

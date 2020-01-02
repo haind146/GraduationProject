@@ -98,5 +98,29 @@ func HandleNewTransaction(hash *chainhash.Hash)  {
 			}
 		}
 	}
+
+	for _, vin := range tx.MsgTx().TxIn {
+		prevTxHash := vin.PreviousOutPoint.Hash.String()
+		txInDb := models.GetTransaction(prevTxHash)
+		if txInDb != nil && txInDb.Type == models.TYPE_PAYMENT {
+			transaction := &models.Transaction{
+				Type:			 models.TYPE_SWEEP,
+				PaymentMethodId: 1,
+			}
+			transaction.From = txInDb.To
+			for _, vout := range tx.MsgTx().TxOut {
+				_, addresses, _, err := txscript.ExtractPkScriptAddrs(vout.PkScript, &chaincfg.TestNet3Params)
+				if err != nil {
+					log.Println("ExtractPkScriptAddrs", err)
+				}
+				if len(addresses) == 1 {
+					transaction.To = addresses[0].String()
+					transaction.Value = float64(vout.Value)/100000000
+				}
+			}
+			models.GetDB().Create(transaction)
+			break
+		}
+	}
 	//log.Println(tx)
 }

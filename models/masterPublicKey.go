@@ -14,9 +14,12 @@ type MasterPublicKey struct {
 
 
 func (masterPublicKey *MasterPublicKey) Create() (map[string] interface{}) {
-	isMasterPublicKeyImported := GetMasterPublicKeyByUser(masterPublicKey.UserId)
-	if (isMasterPublicKeyImported != nil) {
-		return u.Message(false, "Master public key already imported")
+	masterPublicKeyImported := GetMasterPublicKeyByUser(masterPublicKey.UserId)
+	if (masterPublicKeyImported != nil) {
+		if (masterPublicKeyImported.PublicKey != masterPublicKey.PublicKey) {
+			return u.Message(false, "Private Key is not match public key in server")
+		}
+		return u.Message(true, "Success")
 	}
 
     isMasterPubKey := u.ValidateMasterPublicKey(masterPublicKey.PublicKey)

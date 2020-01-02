@@ -4,11 +4,11 @@ import (
 	"bytes"
 	"crypt-coin-payment/models"
 	"encoding/hex"
-	"fmt"
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/btcsuite/btcd/chaincfg/chainhash"
 	"github.com/btcsuite/btcd/rpcclient"
 	"github.com/btcsuite/btcd/txscript"
+	"github.com/btcsuite/btcd/wire"
 	_ "github.com/jinzhu/gorm"
 	"log"
 	"os"
@@ -141,19 +141,18 @@ func (btcFacade *BtcFacade) ApplyNextBlock(blockHash string, blockHeight int64) 
 			txInDb.BlockHash = blockHash
 			txInDb.BlockNumber = uint(blockHeight)
 			order := models.FindOrerById(txInDb.OrderId)
-
-			fmt.Println("sadfsaf", txInDb.OrderId)
-			order.Status = models.ORDER_INBLOCK
-			err = db.Save(order).Error
-			if err != nil {
-				log.Println("SaveOrder", err)
+			if order != nil {
+				order.Status = models.ORDER_INBLOCK
+				err = db.Save(order).Error
+				if err != nil {
+					log.Println("SaveOrder", err)
+				}
 			}
 			err = db.Save(txInDb).Error
 			if err != nil {
 				log.Println("SaveTx", err)
 			}
 		}
-
 	}
 	return nil
 }
@@ -230,4 +229,31 @@ func SweepInfo(appId uint) []*models.SweepInformation {
 		}
 	}
 	return sweepInformations
+}
+
+func DeserializeRawTx(rawTxHex string) (*wire.MsgTx, error) {
+	serializedTx, err := hex.DecodeString(rawTxHex)
+	if err != nil {
+		return nil, err
+	}
+	// Deserialize the transaction and return it.
+	var msgTx wire.MsgTx
+	if err := msgTx.Deserialize(bytes.NewReader(serializedTx)); err != nil {
+		return nil, err
+	}
+	return &msgTx, nil
+}
+
+func SendRawTransaction(rawTxHex string) (string, error) {
+	msgTx, err := DeserializeRawTx(rawTxHex)
+	if err != nil {
+		log.Println("DeserializeRawTx", err)
+		return "", err
+	}
+	txhash, err := BtcRpcClient.SendRawTransaction(msgTx, true)
+	if err != nil {
+		log.Println("SendRawTransaction", err)
+		return "", err
+	}
+	return txhash.String(), err
 }
