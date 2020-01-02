@@ -94,33 +94,33 @@ func HandleNewTransaction(hash *chainhash.Hash)  {
 				} else {
 					dbTx.Commit()
 				}
-				break
+				return
 			}
 		}
 	}
 
-	for _, vin := range tx.MsgTx().TxIn {
-		prevTxHash := vin.PreviousOutPoint.Hash.String()
-		txInDb := models.GetTransaction(prevTxHash)
-		if txInDb != nil && txInDb.Type == models.TYPE_PAYMENT {
-			transaction := &models.Transaction{
-				Type:			 models.TYPE_SWEEP,
-				PaymentMethodId: 1,
-			}
-			transaction.From = txInDb.To
-			for _, vout := range tx.MsgTx().TxOut {
-				_, addresses, _, err := txscript.ExtractPkScriptAddrs(vout.PkScript, &chaincfg.TestNet3Params)
-				if err != nil {
-					log.Println("ExtractPkScriptAddrs", err)
-				}
-				if len(addresses) == 1 {
-					transaction.To = addresses[0].String()
-					transaction.Value = float64(vout.Value)/100000000
-				}
-			}
-			models.GetDB().Create(transaction)
-			break
+	txInDb := models.GetTransaction(tx.MsgTx().TxIn[0].PreviousOutPoint.Hash.String())
+	if txInDb != nil && txInDb.Type == models.TYPE_PAYMENT {
+		transaction := &models.Transaction{
+			Type:			 models.TYPE_SWEEP,
+			PaymentMethodId: 1,
+		}
+		transaction.Value = float64(tx.MsgTx().TxOut[0].Value)/100000000
+		_, addresses, _, err := txscript.ExtractPkScriptAddrs(tx.MsgTx().TxOut[0].PkScript, &chaincfg.TestNet3Params)
+		if err != nil {
+			log.Println("ExtractPkScriptAddrs", err)
+		}
+		transaction.To = addresses[0].String()
+		err = models.GetDB().Create(transaction).Error
+		if err != nil {
+			log.Println("SaveSweepTransaction", err)
+		}
+
+		for _, vin := range tx.MsgTx().TxIn {
+			prevTxHash := vin.PreviousOutPoint.Hash.String()
+			models.SpendUtxo(prevTxHash)
+			txDb := models.GetTransaction(prevTxHash)
+			models.UpdateOrderStatus(txDb.OrderId, models.ORDER_SWEEPED)
 		}
 	}
-	//log.Println(tx)
 }

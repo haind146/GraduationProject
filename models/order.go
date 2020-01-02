@@ -115,3 +115,13 @@ func OrdersList(appId uint) []*Order {
 	}
 	return orders
 }
+
+func UpdateOrderStatus(orderId uint, status uint)  {
+	order := &Order{}
+	db.First(order, orderId)
+	order.Status = status
+	err := db.Save(order).Error
+	if err != nil {
+		log.Println("UpdateOrderStatus", err)
+	}
+}

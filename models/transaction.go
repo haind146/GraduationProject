@@ -30,7 +30,6 @@ type Utxo struct {
 	Spent bool `json:"spent"`
 }
 
-
 func (transaction *Transaction) Create() error {
 	result := GetDB().Create(transaction)
 	return result.Error
@@ -75,4 +74,18 @@ func TransactionsByOrder(orderId uint) []*Transaction {
 		return nil
 	}
 	return transactions
+}
+
+func SpendUtxo(txHash string)  {
+	transaction := &Transaction{}
+	db.Where("transaction_hash = ?", txHash).First(transaction)
+	if transaction != nil {
+		utxo := &Utxo{}
+		db.Where("tx_id = ?", transaction.ID).First(utxo)
+		utxo.Spent = true
+		err := db.Save(utxo).Error
+		if err != nil {
+			log.Println("UpdateUtxo", err)
+		}
+	}
 }
