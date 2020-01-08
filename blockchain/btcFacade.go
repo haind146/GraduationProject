@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypt-coin-payment/models"
 	"encoding/hex"
+	"fmt"
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/btcsuite/btcd/chaincfg/chainhash"
 	"github.com/btcsuite/btcd/rpcclient"
@@ -219,6 +220,7 @@ func SweepInfo(appId uint) []*models.SweepInformation {
 				sweepInformation := &models.SweepInformation{}
 				sweepInformation.RawTx = GetRawTransaction(transaction.TransactionHash)
 				address := &models.Address{}
+				fmt.Println(order.ID)
 				models.GetDB().Where("order_id = ?", order.ID).First(address)
 				sweepInformation.AddressPath = address.MnemonicPath
 				sweepInformation.Vout = utxo.OutputIndex

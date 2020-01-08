@@ -11,11 +11,12 @@ const TYPE_SWEEP  = 2
 type Transaction struct {
 	gorm.Model
 	OrderId uint `json:"order_id"`
+	ApplicationId uint `json:"application_id"`
 	TransactionHash string `gorm:"type:varchar(100);unique_index"`
 	From string `gorm:"type:varchar(100);index"`
 	To string `gorm:"type:varchar(100);index"`
 	Value float64 `json:"value"`
-	Fee uint `json:"fee"`
+	Fee float64 `json:"fee"`
 	BlockHash string `json:"block_hash"`
 	BlockNumber uint `json:"block_number"`
 	Type uint `json:"type"`

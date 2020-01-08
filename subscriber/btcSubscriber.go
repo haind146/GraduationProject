@@ -101,7 +101,9 @@ func HandleNewTransaction(hash *chainhash.Hash)  {
 
 	txInDb := models.GetTransaction(tx.MsgTx().TxIn[0].PreviousOutPoint.Hash.String())
 	if txInDb != nil && txInDb.Type == models.TYPE_PAYMENT {
+
 		transaction := &models.Transaction{
+			TransactionHash: tx.Hash().String(),
 			Type:			 models.TYPE_SWEEP,
 			PaymentMethodId: 1,
 		}
@@ -111,16 +113,22 @@ func HandleNewTransaction(hash *chainhash.Hash)  {
 			log.Println("ExtractPkScriptAddrs", err)
 		}
 		transaction.To = addresses[0].String()
-		err = models.GetDB().Create(transaction).Error
-		if err != nil {
-			log.Println("SaveSweepTransaction", err)
-		}
 
+		totalValue := 0.0
 		for _, vin := range tx.MsgTx().TxIn {
 			prevTxHash := vin.PreviousOutPoint.Hash.String()
 			models.SpendUtxo(prevTxHash)
 			txDb := models.GetTransaction(prevTxHash)
+			totalValue += txDb.Value
 			models.UpdateOrderStatus(txDb.OrderId, models.ORDER_SWEEPED)
+		}
+
+		transaction.Fee = totalValue - transaction.Value
+		order := models.FindOrerById(txInDb.OrderId)
+		transaction.ApplicationId = order.ApplicationId
+		err = models.GetDB().Create(transaction).Error
+		if err != nil {
+			log.Println("SaveSweepTransaction", err)
 		}
 	}
 }

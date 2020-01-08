@@ -27,6 +27,7 @@ func main() {
 	router.HandleFunc("/api/user/order/create", controllers.CreateOrder).Methods("POST")
 	router.HandleFunc("/api/user/order/list", controllers.GetOrdersList).Methods("GET")
 	router.HandleFunc("/api/user/order/transactions", controllers.GetTransactionsByOrder).Methods("GET")
+	router.HandleFunc("/api/user/sweep-transaction", controllers.GetSweepTransaction).Methods("GET")
 	//router.HandleFunc("/api/user/wallet/change", controllers.AcceptRegisterUser).Methods("POST")
 	router.HandleFunc("/api/user/login", controllers.Authenticate).Methods("POST")
 	router.HandleFunc("/api/user/sweep-money", controllers.GetSweepMoneyInfo).Methods("GET")

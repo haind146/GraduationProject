@@ -111,6 +111,16 @@ func ApplicationsList(userId uint) []*Application {
 	return applications
 }
 
+func GetSweepTransaction(appId uint) []*Transaction {
+	transactions := make([]*Transaction, 0)
+	err := GetDB().Table("transactions").Where("application_id = ?", appId).Find(&transactions).Error
+	if err != nil {
+		log.Println("ApplicationList", err)
+		return nil
+	}
+	return transactions
+}
+
 type SweepInformation struct {
 	TxId string `json:"tx_id"`
 	RawTx string `json:"raw_tx"`

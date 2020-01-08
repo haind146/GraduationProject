@@ -54,6 +54,21 @@ var GetSweepMoneyInfo = func(w http.ResponseWriter, r *http.Request) {
 	u.Respond(w, resp)
 }
 
+var GetSweepTransaction = func(w http.ResponseWriter, r *http.Request) {
+	//id := r.Context().Value("user") . (uint)
+	appId, ok := r.URL.Query()["application_id"]
+	if !ok || len(appId[0]) < 1 {
+		resp := u.Message(false, "Url Param 'app' is missing")
+		u.Respond(w, resp)
+		return
+	}
+	applicationId, _ := strconv.ParseUint(appId[0], 10, 64)
+	data := models.GetSweepTransaction(uint(applicationId))
+	resp := u.Message(true, "success")
+	resp["data"] = data
+	u.Respond(w, resp)
+}
+
 var SendRawTransaction = func(w http.ResponseWriter, r *http.Request) {
 	type RawTx struct {
 		RawTx string `json:"raw_tx"`
